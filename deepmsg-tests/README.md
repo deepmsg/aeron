@@ -40,6 +40,8 @@ are deliberately separate checkouts.
 | `ArchiveConnectProbe.java` | the archive connect over a `control-mode=response` IPC response channel |
 | `RecordingEventsProbe.java` | the three recording events, decoded by the reference's own `RecordingEventsAdapter` |
 | `ReferenceArchiveClientProbe.java` | ★ the reference's own `AeronArchive` client against **our** archive, on the **reference's** Java media driver — the mixed gate |
+| `ClusterEchoService.java` | LC-4b: a Java `ClusteredService` loaded by the reference's container against **our** consensus module |
+| `ClusterEchoClientProbe.java` | LC-4b: the reference's own `AeronCluster` client; prints `RECEIVED <n>` |
 
     javac -proc:none -cp <jar> -d <classes> java/<name>.java
 
