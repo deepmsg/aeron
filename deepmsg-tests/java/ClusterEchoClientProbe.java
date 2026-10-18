@@ -10,7 +10,7 @@
  *
  * `OFFER_FAILED` is printed instead if the cluster never accepted a message.
  *
- * Usage: <aeron dir> <message count>
+ * Usage: <aeron dir> <message count> [timeoutSeconds]
  *
  * Compiled by the test:
  *     javac -proc:none -cp <aeron-all.jar> -d <classes> ClusterEchoClientProbe.java
@@ -26,12 +26,15 @@ public class ClusterEchoClientProbe
 {
     private static final int INGRESS_STREAM_ID = 101;
     private static final int EGRESS_STREAM_ID = 102;
-    private static final long TIMEOUT_NS = TimeUnit.SECONDS.toNanos(20);
+    private static final long DEFAULT_TIMEOUT_SECONDS = 20;
 
     public static void main(final String[] args)
     {
         final String aeronDir = args[0];
         final int count = Integer.parseInt(args[1]);
+        final long timeoutSeconds = args.length > 2 ?
+            Long.parseLong(args[2]) : DEFAULT_TIMEOUT_SECONDS;
+        final long timeoutNs = TimeUnit.SECONDS.toNanos(timeoutSeconds);
         final AtomicInteger received = new AtomicInteger();
 
         try (AeronCluster cluster = AeronCluster.connect(
@@ -45,7 +48,7 @@ public class ClusterEchoClientProbe
                     received.incrementAndGet())))
         {
             final UnsafeBuffer message = new UnsafeBuffer(new byte[4]);
-            final long deadline = System.nanoTime() + TIMEOUT_NS;
+            final long deadline = System.nanoTime() + timeoutNs;
 
             for (int i = 0; i < count; i++)
             {
