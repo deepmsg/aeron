@@ -61,7 +61,7 @@ public class ClusterAuctionServiceProbe
      * The reference's tutorial business
      * (`BasicAuctionClusteredService.java:44-323`), without its prints.
      */
-    static class BasicAuctionClusteredService implements ClusteredService
+    public static class BasicAuctionClusteredService implements ClusteredService
     {
         static final int CORRELATION_ID_OFFSET = 0;
         static final int CUSTOMER_ID_OFFSET = CORRELATION_ID_OFFSET + 8;

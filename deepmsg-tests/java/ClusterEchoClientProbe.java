@@ -10,7 +10,7 @@
  *
  * `OFFER_FAILED` is printed instead if the cluster never accepted a message.
  *
- * Usage: <aeron dir> <message count> [timeoutSeconds]
+ * Usage: <aeron dir> <message count> [timeoutSeconds] [expectedAnswers]
  *
  * Compiled by the test:
  *     javac -proc:none -cp <aeron-all.jar> -d <classes> ClusterEchoClientProbe.java
@@ -35,6 +35,12 @@ public class ClusterEchoClientProbe
         final long timeoutSeconds = args.length > 2 ?
             Long.parseLong(args[2]) : DEFAULT_TIMEOUT_SECONDS;
         final long timeoutNs = TimeUnit.SECONDS.toNanos(timeoutSeconds);
+        // A multi-service cluster answers each message once per service, so the
+        // final reading can be more than the message count. Without this the
+        // probe would print as soon as the *first* answer of the last message
+        // arrived, and a lost duplicate would look like a smaller number rather
+        // than a failure.
+        final int expectedAnswers = args.length > 3 ? Integer.parseInt(args[3]) : count;
         final AtomicInteger received = new AtomicInteger();
 
         try (AeronCluster cluster = AeronCluster.connect(
@@ -71,6 +77,12 @@ public class ClusterEchoClientProbe
                     cluster.pollEgress();
                     Thread.yield();
                 }
+            }
+
+            while (received.get() < expectedAnswers && System.nanoTime() < deadline)
+            {
+                cluster.pollEgress();
+                Thread.yield();
             }
 
             System.out.println("RECEIVED " + received.get());
